@@ -1,0 +1,32 @@
+Answer on feedback comment from 5.06.2024:
+This was done purposely.
+
+Let's assume that memory allocation will fail at some point.
+
+// Allocates memory for ${stringCount} pointers to C strings
+char** cStrings = (char**)malloc(stringCount * sizeof(char*));
+
+And then we allocate memory in "for" loop, let's say for 4 strings.
+
+// Successfully
+1: char* p = (char*)malloc(MAX_STRING_SIZE + 1);
+1: cStrings[i] = p;
+
+// Successfully
+2: char* p = (char*)malloc(MAX_STRING_SIZE + 1);
+2: cStrings[i] = p;
+
+// Failed to allocate memory
+3: char* p = (char*)malloc(MAX_STRING_SIZE + 1);
+3: cStrings[i] = p;
+
+And at this state there is already allocated memory for 2 previous strings.
+So as program is about to stop, we should free up allocated memory.
+
+And this loop:
+for (int j = 0; j < i; j++) {
+	// Frees memory that was allocated before failure
+	free(cStrings[j]);
+}
+
+It frees successfully allocated memory in first two iterations, as for loops takes "i" instead of "stringCount".
